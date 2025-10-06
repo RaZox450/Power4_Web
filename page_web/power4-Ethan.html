@@ -18,14 +18,16 @@
                 <p>Le but du jeu est d'aligner 4 pions de sa couleur horizontalement, verticalement ou en diagonale.</p>
                 <p>Le joueur 1 commence toujours la partie.</p>
             </div>
-            
         </header>
         <main>
-            <div>
+            <div id="playerChoice">
                 <p>Choix du pseudo du joueur 1 : </p>
                 <input type="text" id="player1" name="player1" placeholder="Joueur 1">
                 <p>Choix du pseudo du joueur 2 : </p>
                 <input type="text" id="player2" name="player2" placeholder="Joueur 2">
+            </div>
+            <div>
+                <button onclick="startGame()">Commencer une partie</button>
             </div>
         </main>
         <footer>

@@ -49,6 +49,12 @@ header h2 {
     text-align: justify;
 }
 
+#playerChoice {
+    text-align: center;
+    margin-top: 20px;
+    
+}
+
 /* Footer */
 footer {
     background-color: #f2f2f2;
