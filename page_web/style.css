@@ -50,9 +50,41 @@ header h2 {
 }
 
 #playerChoice {
-    text-align: center;
     margin-top: 20px;
-    
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;  
+}
+
+#playerChoice input {
+    accent-color: #f6d1d8;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+#gameStart {
+    text-align: center;
+    margin-top: 30px;
+}
+
+#gameStart a {
+    background-color: #f6d1d8; 
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#gameStart a:hover {
+    background-color: #f4a9b7;
+    cursor: pointer;
 }
 
 /* Footer */
