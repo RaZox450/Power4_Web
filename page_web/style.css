@@ -12,19 +12,47 @@ body {
     line-height: 1.6;
 }
 
-/* Header et navigation */
+/* Header */
 
-header {
-    background-color: #b30000; 
+#header {
+    background-color: #f6d1d8; 
     color: white;
-    padding: 20px 0;
+    padding: 15px 0;
     text-align: center;
 }
 
 header h1 {
     margin-bottom: 20px;
     font-family: fantasy;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     font-size: 70px;
+}
+
+header h2 {
+    margin-bottom: 20px;
+    font-family: fantasy;
+    text-shadow: 2px 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+#rules {
+    max-width: 900px;
+    margin: 60px auto;
+    padding: 30px;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+#rules p {
+    margin-bottom: 3px;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: justify;
+}
+
+#playerChoice {
+    text-align: center;
+    margin-top: 20px;
+    
 }
 
 /* Footer */
