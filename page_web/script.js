@@ -27,3 +27,14 @@ for(i=0;i<=5;i++)
   context.beginPath();
   }
   }
+
+function startGame() {
+    const player1 = document.getElementById("player1").value;
+    const player2 = document.getElementById("player2").value;
+
+    if (player1 && player2) {
+        window.location.href="power4_jeu.html";
+    } else {
+        alert("Veuillez choisir vos pseudos.");
+    }
+}
