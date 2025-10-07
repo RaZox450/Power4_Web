@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"html/template"
+
 )
 //Afficher page d'accueil
 func home(w http.ResponseWriter, r *http.Request){
@@ -31,8 +32,9 @@ func game(w http.ResponseWriter, r *http.Request){
 
 //création du serveur
 func main(){ 
-	http.Handle("/page_web/", http.StripPrefix("/page_web/", http.FileServer(http.Dir("page_web"))))
+	fs := http.FileServer(http.Dir("page_web/"))
+	http.Handle("/page_web/", http.StripPrefix("/page_web/", fs))
 	http.HandleFunc("/", home)
 	http.HandleFunc("/power4_jeu", game)
-	http.ListenAndServe("", nil)
+	http.ListenAndServe(":5500", nil)
 }
