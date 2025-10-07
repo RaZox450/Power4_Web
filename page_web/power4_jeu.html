@@ -15,42 +15,11 @@
             </div>
         </header>
         <main>
-            <canvas id="structure" width="2000" height="650"> </canvas>
-            
+             <canvas id="structure" width="2000" height="650"></canvas> 
         </main>
         <footer>
             <p>© 2025 Puissance 4 | Tous droits non réservés</p>
         </footer>
     </body>
-    <script>  //pour inserer du code JS dans html 
-     
- 
-  var canvas = document.getElementById("structure");
-  var context = canvas.getContext("2d");
-   
-   
-  //Rectangle
-  context.beginPath();
-  context.fillStyle="blue";  
-  context.lineWidth="10";  
-  context.rect(500,50,600,515);
-  context.fill();
-  context.closePath();
-
-  //Cercle
-  context.beginPath();
-  context.fillStyle = "white";
-   
-for(i=0;i<=5;i++)
-{
- for(j=0;j<=6;j++)
-  {
-  context.arc(545+85*j,95+85*i,35,Math.PI*2,false); 
-  context.fill();
-  context.beginPath();
-  }
-  }
-  
-   
-        </script>
+    <script src="script.js"></script>
 </html>
