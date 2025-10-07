@@ -13,22 +13,25 @@
                 <h1>Puissance 4</h1>
                 <h2>Le jeu est disponible pour 2 joueurs !</h2>
             </div>
+        </header>
+        <main>
             <div id ="rules">
                 <p>Le joueur 1 est représenté par des pions rouges et le joueur 2 par des pions jaunes.</p>
                 <p>Le but du jeu est d'aligner 4 pions de sa couleur horizontalement, verticalement ou en diagonale.</p>
                 <p>Le joueur 1 commence toujours la partie.</p>
+                <div id="playerChoice">
+                    <p>Choix du pseudo du joueur 1 : </p>
+                    <input type="text" id="player1" name="player1" placeholder="Joueur 1">
+                    <p>Choix du pseudo du joueur 2 : </p>
+                    <input type="text" id="player2" name="player2" placeholder="Joueur 2">
+                </div>
             </div>
-        </header>
-        <main>
-            <div>
-                <p>Choix du pseudo du joueur 1 : </p>
-                <input type="text" id="player1" name="player1" placeholder="Joueur 1">
-                <p>Choix du pseudo du joueur 2 : </p>
-                <input type="text" id="player2" name="player2" placeholder="Joueur 2">
+            <div id="gameStart">
+                <a onclick="startGame()">Commencer une partie</a>
             </div>
         </main>
         <footer>
-            <p>© 2025 Puissance 4 | Tous droits réservés</p>
+            <p>© 2025 Puissance 4 | Tous droits non réservés</p>
         </footer>
     </body>
 </html>
