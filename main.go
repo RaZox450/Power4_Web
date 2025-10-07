@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"html/template"
 )
-//Afiicher page d'accueil
+//Afficher page d'accueil
 func home(w http.ResponseWriter, r *http.Request){
 	tmpl := template.Must(template.ParseFiles("page_web/power4_accueil.html"))
 	if r.Method != http.MethodPost{
@@ -31,7 +31,8 @@ func game(w http.ResponseWriter, r *http.Request){
 
 //création du serveur
 func main(){ 
+	http.Handle("/page_web/", http.StripPrefix("/page_web/", http.FileServer(http.Dir("page_web"))))
 	http.HandleFunc("/", home)
 	http.HandleFunc("/power4_jeu", game)
 	http.ListenAndServe("", nil)
-	}
+}
