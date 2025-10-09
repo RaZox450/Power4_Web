@@ -33,7 +33,7 @@ function startGame() {
     const player2 = document.getElementById("player2").value;
 
     if (player1 && player2) {
-        window.location.href="power4_jeu.html";
+        window.location.href="/page_web/power4_jeu.html";
     } else {
         alert("Veuillez choisir vos pseudos.");
     }
