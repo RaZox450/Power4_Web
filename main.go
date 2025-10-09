@@ -26,8 +26,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func game(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("page_web/power4_jeu.html"))
-	tmpl.Execute(w, nil)
+	http.ServeFile(w, r, "page_web/power4_jeu.html")
 }
 
 // création du serveur
@@ -35,6 +34,6 @@ func main() {
 	fs := http.FileServer(http.Dir("page_web/"))
 	http.Handle("/page_web/", http.StripPrefix("/page_web/", fs))
 	http.HandleFunc("/", home)
-	http.HandleFunc("/power4_jeu", game)
-	http.ListenAndServe(":5500", nil)
+	http.HandleFunc("/power4_jeu.html", game)
+	http.ListenAndServe(":8080", nil)
 }
