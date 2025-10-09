@@ -3,7 +3,7 @@ var canvas = document.getElementById("structure");
    
   //Rectangle
   context.beginPath();
-  context.fillStyle="blue";  
+  context.fillStyle="#ADD8E6";  
   context.lineWidth="10";  
   context.rect(500,50,600,515);
   context.fill();
