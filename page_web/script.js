@@ -1,7 +1,6 @@
 var canvas = document.getElementById("structure");
   var context = canvas.getContext("2d");
    
-   
   //Rectangle
   context.beginPath();
   context.fillStyle="blue";  
@@ -10,14 +9,10 @@ var canvas = document.getElementById("structure");
   context.fill();
   context.closePath();
    
-  
-  
-   
   //Cercle
   context.beginPath();
   context.fillStyle = "white";
    
-  
 for(i=0;i<=5;i++)
 {
  for(j=0;j<=6;j++)
