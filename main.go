@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
 )
@@ -18,12 +19,18 @@ var grille Grille
 
 // Afficher page d'accueil
 func home(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("/page_web/power4_accueil.html"))
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
+
+	tmpl := template.Must(template.ParseFiles("page_web/power4_accueil.html"))
 	if r.Method != http.MethodPost {
 		tmpl.Execute(w, nil)
 		return
 	}
 
+	r.ParseForm()
 	type Joueur struct {
 		Pseudo1 string
 		Pseudo2 string
@@ -46,8 +53,23 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func game(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("/page_web/power4_jeu.html"))
-	tmpl.Execute(w, grille)
+	if r.URL.Path != "/power4_jeu" {
+		http.NotFound(w, r)
+		return
+	}
+
+	if r.Header.Get("Accept") == "application/json" {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(grille)
+		return
+	}
+
+	tmpl := template.Must(template.ParseFiles("page_web/power4_jeu.html"))
+	err := tmpl.Execute(w, grille)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 // Fonction pour placer un pion
@@ -100,10 +122,24 @@ func placerPion(w http.ResponseWriter, r *http.Request) {
 
 // création du serveur
 func main() {
-	fs := http.FileServer(http.Dir("page_web/"))
+	// Serveur de fichiers statiques
+	fs := http.FileServer(http.Dir("page_web"))
 	http.Handle("/page_web/", http.StripPrefix("/page_web/", fs))
+
+	// Routes
 	http.HandleFunc("/", home)
 	http.HandleFunc("/power4_jeu", game)
 	http.HandleFunc("/placer-pion", placerPion)
-	http.ListenAndServe(":5500", nil)
+
+	// Initialisation de la grille
+	grille = Grille{
+		Cases:        [6][7]int{},
+		JoueurActuel: 1,
+	}
+
+	fmt.Println("Serveur démarré sur http://localhost:5500")
+	err := http.ListenAndServe(":5500", nil)
+	if err != nil {
+		fmt.Printf("Erreur serveur: %v\n", err)
+	}
 }

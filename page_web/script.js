@@ -3,6 +3,9 @@ let structureCtx = structureCanvas.getContext("2d");
 let jetonsCanvas = document.getElementById("jetons");
 let jetonsCtx = jetonsCanvas.getContext("2d");
 
+// État initial de la grille
+let grille = Array(6).fill().map(() => Array(7).fill(0));
+
 // Dessiner la structure
 function dessinerStructure() {
     structureCtx.beginPath();
@@ -80,16 +83,48 @@ document.getElementById("quitter")?.addEventListener("click", () => {
     window.location.href = "/page_web/power4_accueil.html";
 });
 
+// Initialiser le jeu
+async function initialiserJeu() {
+    try {
+        const response = await fetch("/power4_jeu", {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        if (response.ok) {
+            const data = await response.json();
+            grille = data.Cases;
+            dessinerStructure();
+            dessinerJetons(grille);
+            document.getElementById("tour").textContent = 
+                `Tour du joueur ${data.JoueurActuel} (${data.JoueurActuel === 1 ? "rouge" : "jaune"})`;
+        } else {
+            console.error("Erreur serveur:", response.status);
+        }
+    } catch (error) {
+        console.error("Erreur d'initialisation:", error);
+        dessinerStructure(); // Au moins afficher la grille vide
+    }
+}
+
 // Initialisation
-dessinerStructure();
+initialiserJeu();
 
 function startGame() {
-    const player1 = document.getElementById("player1").value;
-    const player2 = document.getElementById("player2").value;
+    const player1 = document.getElementById("player1")?.value;
+    const player2 = document.getElementById("player2")?.value;
 
     if (player1 && player2) {
-      window.location.href = "/page_web/power4_jeu.html";
-      document.getElementById("playerForm").submit();
+        const formData = new FormData();
+        formData.append("player1", player1);
+        formData.append("player2", player2);
+        
+        fetch("/", {
+            method: "POST",
+            body: formData
+        }).then(() => {
+            window.location.href = "/power4_jeu";
+        });
     } else {
         alert("Veuillez choisir vos pseudos.");
     }
