@@ -8,17 +8,17 @@ import (
 
 // Structure pour la grille de jeu
 type Grille struct {
-	Cases    [6][7]int
+	Cases        [6][7]int
 	JoueurActuel int
-	Pseudo1  string
-	Pseudo2  string
+	Pseudo1      string
+	Pseudo2      string
 }
 
 var grille Grille
 
 // Afficher page d'accueil
 func home(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("page_web/power4_accueil.html"))
+	tmpl := template.Must(template.ParseFiles("/page_web/power4_accueil.html"))
 	if r.Method != http.MethodPost {
 		tmpl.Execute(w, nil)
 		return
@@ -33,20 +33,20 @@ func home(w http.ResponseWriter, r *http.Request) {
 		Pseudo1: r.FormValue("player1"),
 		Pseudo2: r.FormValue("player2"),
 	}
-	
+
 	// Initialiser la grille pour une nouvelle partie
 	grille = Grille{
-		Cases:    [6][7]int{},
+		Cases:        [6][7]int{},
 		JoueurActuel: 1,
-		Pseudo1:  data.Pseudo1,
-		Pseudo2:  data.Pseudo2,
+		Pseudo1:      data.Pseudo1,
+		Pseudo2:      data.Pseudo2,
 	}
-	
+
 	tmpl.Execute(w, data)
 }
 
 func game(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("page_web/power4_jeu.html"))
+	tmpl := template.Must(template.ParseFiles("/page_web/power4_jeu.html"))
 	tmpl.Execute(w, grille)
 }
 
