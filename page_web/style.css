@@ -99,6 +99,22 @@ header h2 {
     height: auto;
 }
 
+/* Ensure both canvases (structure + jetons) share the same responsive sizing
+   and are placed inside the game container */
+#game-container {
+    width: 100%;
+    max-width: 1200px; /* sensible max to keep layout neat */
+    margin: 20px auto;
+    position: relative;
+}
+
+#game-container canvas {
+    display: block;
+    width: 100%;   /* CSS width for responsiveness */
+    height: auto;   /* maintain aspect ratio */
+    border-radius: 12px;
+}
+
 main {
     min-height: 70vh;
 }
