@@ -143,3 +143,5 @@ func main() {
 		fmt.Printf("Erreur serveur: %v\n", err)
 	}
 }
+
+// Pour exécuter le serveur, utilisez la commande : go run main.go
