@@ -25,6 +25,12 @@
                     <p>Choix du pseudo du joueur 2 : </p>
                     <input type="text" id="player2" name="player2" placeholder="Joueur 2">
                 </div>
+                <div id="difficulty" style="text-align:center; margin-top:20px;">
+                    <p>Choix de la difficulté :</p>
+                    <label><input type="radio" name="difficulty" value="facile" checked> Facile (6x7)</label>
+                    <label style="margin-left:10px;"><input type="radio" name="difficulty" value="moyen"> Moyen (6x9)</label>
+                    <label style="margin-left:10px;"><input type="radio" name="difficulty" value="difficile"> Difficile (7x8)</label>
+                </div>
             </div>
             <div id="gameStart">
                 <a onclick=startGame()>Commencer une partie</a>

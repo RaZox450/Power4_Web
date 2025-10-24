@@ -1,5 +1,5 @@
-// Configuration du jeu (constantes logiques)
-const config = {
+// Configuration du jeu (modifiable après réception de la grille)
+let config = {
     colonnes: 7,
     lignes: 6,
     paddingRatio: 0.15, // padding relative à la taille de cellule
@@ -19,15 +19,19 @@ let lastClick = null; // {x,y}
 
 // Container and aspect ratio handling
 const gameContainer = document.getElementById('game-container');
-// Use the HTML intrinsic aspect ratio as default (height / width)
-const DEFAULT_ASPECT = 750 / 1600;
+// Aspect ratio will be computed from grid dimensions (rows/cols)
+function computeAspect() {
+    // include small padding rows/cols to leave margins
+    return (config.lignes + 2) / (config.colonnes + 2);
+}
 
 // Resize canvas to match displayed size and devicePixelRatio
 function resizeCanvases() {
     const dpr = window.devicePixelRatio || 1;
     // Decide CSS size based on container width and aspect ratio
-    const cssW = Math.max(100, Math.min(gameContainer.clientWidth, window.innerWidth));
-    const cssH = Math.round(cssW * DEFAULT_ASPECT);
+    const cssW = Math.max(200, Math.min(gameContainer.clientWidth, window.innerWidth));
+    const aspect = computeAspect();
+    const cssH = Math.round(cssW * aspect);
 
     // Apply the same CSS size to both canvases so they overlap exactly
     [structureCanvas, jetonsCanvas].forEach((c) => {
@@ -252,6 +256,11 @@ async function initialiserJeu() {
             const data = await response.json();
             // Mettre à jour la grille avec les données du serveur
             grille = data.Cases;
+            // Mettre à jour la config de taille selon la grille côté serveur
+            if (Array.isArray(data.Cases) && data.Cases.length > 0) {
+                config.lignes = data.Cases.length;
+                config.colonnes = data.Cases[0].length;
+            }
             // Dessiner tout le jeu
             redessinerJeu();
             // Réactiver les clics
@@ -307,6 +316,10 @@ function startGame() {
         const formData = new FormData();
         formData.append("player1", player1);
         formData.append("player2", player2);
+        // lire la difficulté choisie
+        const difficultyInput = document.querySelector('input[name="difficulty"]:checked');
+        const difficulty = difficultyInput ? difficultyInput.value : 'facile';
+        formData.append("difficulty", difficulty);
         
         fetch("/", {
             method: "POST",

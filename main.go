@@ -8,7 +8,7 @@ import (
 
 // Structure pour la grille de jeu
 type Grille struct {
-	Cases        [6][7]int
+	Cases        [][]int
 	JoueurActuel int
 	Pseudo1      string
 	Pseudo2      string
@@ -30,14 +30,32 @@ func home(w http.ResponseWriter, r *http.Request) {
 		Pseudo2 string
 	}
 
+	r.ParseForm()
+	difficulty := r.FormValue("difficulty")
 	data := Joueur{
 		Pseudo1: r.FormValue("player1"),
 		Pseudo2: r.FormValue("player2"),
 	}
 
-	// Initialiser la grille pour une nouvelle partie
+	// Choisir la taille en fonction de la difficulté
+	rows, cols := 6, 7 // par défaut facile
+	switch difficulty {
+	case "facile":
+		rows, cols = 6, 7
+	case "moyen":
+		rows, cols = 6, 9
+	case "difficile":
+		rows, cols = 7, 8
+	}
+
+	// Initialiser la grille vide dynamique
+	cases := make([][]int, rows)
+	for i := 0; i < rows; i++ {
+		cases[i] = make([]int, cols)
+	}
+
 	grille = Grille{
-		Cases:        [6][7]int{},
+		Cases:        cases,
 		JoueurActuel: 1,
 		Pseudo1:      data.Pseudo1,
 		Pseudo2:      data.Pseudo2,
@@ -47,13 +65,15 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func game(w http.ResponseWriter, r *http.Request) {
-	// Réinitialiser complètement la grille pour une nouvelle partie
-	grille = Grille{
-		Cases:        [6][7]int{},
-		JoueurActuel: 1,
-		Winner:       0,
-		Pseudo1:      grille.Pseudo1, // Garder les pseudos
-		Pseudo2:      grille.Pseudo2,
+	// Si la grille n'est pas initialisée (accès direct), créer une grille par défaut 6x7
+	if len(grille.Cases) == 0 {
+		cases := make([][]int, 6)
+		for i := 0; i < 6; i++ {
+			cases[i] = make([]int, 7)
+		}
+		grille.Cases = cases
+		grille.JoueurActuel = 1
+		grille.Winner = 0
 	}
 
 	// Désactiver la mise en cache
@@ -87,15 +107,21 @@ func placerPion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Vérifier si la colonne est valide
-	if colonne < 0 || colonne >= 7 {
+	// Vérifier si la colonne est valide en fonction de la grille actuelle
+	rows := len(grille.Cases)
+	if rows == 0 {
+		http.Error(w, "Grille non initialisée", http.StatusInternalServerError)
+		return
+	}
+	cols := len(grille.Cases[0])
+	if colonne < 0 || colonne >= cols {
 		http.Error(w, "Colonne invalide", http.StatusBadRequest)
 		return
 	}
 
-	// Trouver la première case vide dans la colonne
+	// Trouver la première case vide dans la colonne (depuis le bas)
 	ligne := -1
-	for i := 5; i >= 0; i-- {
+	for i := rows - 1; i >= 0; i-- {
 		if grille.Cases[i][colonne] == 0 {
 			ligne = i
 			break
@@ -133,11 +159,15 @@ func checkVictory(player int) bool {
 	if player == 0 {
 		return false
 	}
-
 	directions := [][2]int{{0, 1}, {1, 0}, {1, 1}, {1, -1}} // droite, bas, diag bas-droite, diag bas-gauche
+	rows := len(grille.Cases)
+	if rows == 0 {
+		return false
+	}
+	cols := len(grille.Cases[0])
 
-	for i := 0; i < 6; i++ {
-		for j := 0; j < 7; j++ {
+	for i := 0; i < rows; i++ {
+		for j := 0; j < cols; j++ {
 			if grille.Cases[i][j] != player {
 				continue
 			}
@@ -146,7 +176,7 @@ func checkVictory(player int) bool {
 				count := 1
 				x := i + d[0]
 				y := j + d[1]
-				for count < 4 && x >= 0 && x < 6 && y >= 0 && y < 7 && grille.Cases[x][y] == player {
+				for count < 4 && x >= 0 && x < rows && y >= 0 && y < cols && grille.Cases[x][y] == player {
 					count++
 					x += d[0]
 					y += d[1]
@@ -164,8 +194,19 @@ func checkVictory(player int) bool {
 // Réinitialise complètement la partie
 func reinitialiser(w http.ResponseWriter, r *http.Request) {
 	// Créer une nouvelle grille vide
+	// garder dimensions actuelles
+	rows := 6
+	cols := 7
+	if len(grille.Cases) > 0 {
+		rows = len(grille.Cases)
+		cols = len(grille.Cases[0])
+	}
+	cases := make([][]int, rows)
+	for i := 0; i < rows; i++ {
+		cases[i] = make([]int, cols)
+	}
 	grille = Grille{
-		Cases:        [6][7]int{},
+		Cases:        cases,
 		JoueurActuel: 1,
 		Winner:       0,
 		Pseudo1:      grille.Pseudo1,
