@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"html/template"
+	"log"
 	"net/http"
 )
 
@@ -12,7 +13,8 @@ type Grille struct {
 	JoueurActuel int
 	Pseudo1      string
 	Pseudo2      string
-	Winner       int // 0 = pas de gagnant, 1 ou 2 pour le gagnant
+	Winner       int    // 0 = pas de gagnant, 1 ou 2 pour le gagnant
+	Difficulty   string // "facile", "moyen", "difficile"
 }
 
 var grille Grille
@@ -37,6 +39,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 		Pseudo2: r.FormValue("player2"),
 	}
 
+	// Journaliser les données reçues
+	log.Printf("Données reçues : Pseudo1=%s, Pseudo2=%s, Difficulty=%s", data.Pseudo1, data.Pseudo2, difficulty)
+
 	// Choisir la taille en fonction de la difficulté
 	rows, cols := 6, 7 // par défaut facile
 	switch difficulty {
@@ -59,21 +64,59 @@ func home(w http.ResponseWriter, r *http.Request) {
 		JoueurActuel: 1,
 		Pseudo1:      data.Pseudo1,
 		Pseudo2:      data.Pseudo2,
+		Difficulty:   difficulty,
 	}
 
-	tmpl.Execute(w, data)
+	// Journaliser l'URL de redirection
+	redirectURL := "/power4_jeu_" + difficulty
+	log.Printf("Redirection vers : %s", redirectURL)
+
+	// Rediriger vers la page appropriée selon la difficulté
+	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }
 
 func game(w http.ResponseWriter, r *http.Request) {
-	// Si la grille n'est pas initialisée (accès direct), créer une grille par défaut 6x7
-	if len(grille.Cases) == 0 {
-		cases := make([][]int, 6)
-		for i := 0; i < 6; i++ {
-			cases[i] = make([]int, 7)
+	// Déterminer la difficulté à partir du chemin (ex: /power4_jeu_moyen)
+	path := r.URL.Path
+	difficulty := "facile"
+	switch path {
+	case "/power4_jeu_facile":
+		difficulty = "facile"
+	case "/power4_jeu_moyen":
+		difficulty = "moyen"
+	case "/power4_jeu_difficile":
+		difficulty = "difficile"
+	case "/power4_jeu":
+		// endpoint JSON pour l'initialisation depuis le client
+		// laisser difficulty tel quel (sera géré ci-dessous)
+	default:
+		// si route inconnue, garder la difficulté actuelle ou défaut
+		if grille.Difficulty != "" {
+			difficulty = grille.Difficulty
+		}
+	}
+
+	// Si la grille n'est pas initialisée ou si la difficulté demandée diffère,
+	// initialiser une nouvelle grille adaptée à la difficulté
+	rows, cols := 6, 7
+	switch difficulty {
+	case "facile":
+		rows, cols = 6, 7
+	case "moyen":
+		rows, cols = 6, 9
+	case "difficile":
+		rows, cols = 7, 8
+	}
+
+	if len(grille.Cases) == 0 || grille.Difficulty != difficulty {
+		cases := make([][]int, rows)
+		for i := 0; i < rows; i++ {
+			cases[i] = make([]int, cols)
 		}
 		grille.Cases = cases
 		grille.JoueurActuel = 1
 		grille.Winner = 0
+		grille.Difficulty = difficulty
 	}
 
 	// Désactiver la mise en cache
@@ -88,9 +131,16 @@ func game(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Sinon on renvoie la page HTML
-	tmpl := template.Must(template.ParseFiles("page_web/power4_jeu.html"))
-	tmpl.Execute(w, grille)
+	// Si on veut la page HTML, servir le fichier statique correspondant à la difficulté
+	file := "page_web/power4_jeu_facile.html"
+	switch grille.Difficulty {
+	case "moyen":
+		file = "page_web/power4_jeu_moyen.html"
+	case "difficile":
+		file = "page_web/power4_jeu_difficile.html"
+	}
+
+	http.ServeFile(w, r, file)
 }
 
 // Fonction pour placer un pion
@@ -211,6 +261,7 @@ func reinitialiser(w http.ResponseWriter, r *http.Request) {
 		Winner:       0,
 		Pseudo1:      grille.Pseudo1,
 		Pseudo2:      grille.Pseudo2,
+		Difficulty:   grille.Difficulty,
 	}
 
 	// Renvoyer la nouvelle grille en JSON
@@ -222,7 +273,11 @@ func main() {
 	fs := http.FileServer(http.Dir("page_web/"))
 	http.Handle("/page_web/", http.StripPrefix("/page_web/", fs))
 	http.HandleFunc("/", home)
-	http.HandleFunc("/power4_jeu", game)
+	// Routes pour chaque difficulté
+	http.HandleFunc("/power4_jeu_facile", game)
+	http.HandleFunc("/power4_jeu_moyen", game)
+	http.HandleFunc("/power4_jeu_difficile", game)
+	http.HandleFunc("/power4_jeu", game) // endpoint JSON pour initialisation client
 	http.HandleFunc("/placer-pion", placerPion)
 	http.HandleFunc("/reinitialiser", reinitialiser)
 	http.ListenAndServe(":5500", nil)

@@ -3,7 +3,13 @@ let config = {
     colonnes: 7,
     lignes: 6,
     paddingRatio: 0.15, // padding relative à la taille de cellule
-    radiusRatio: 0.42,   // radius relative à la taille de cellule
+    radiusRatio: 0.42,  // radius relative à la taille de cellule
+    // Configuration spécifique pour chaque difficulté
+    dimensions: {
+        'facile': { lignes: 6, colonnes: 7, canvasWidth: 1600, canvasHeight: 750 },
+        'moyen': { lignes: 6, colonnes: 9, canvasWidth: 1800, canvasHeight: 750 },
+        'difficile': { lignes: 7, colonnes: 8, canvasWidth: 1700, canvasHeight: 850 }
+    }
 };
 
 const structureCanvas = document.getElementById("structure");
@@ -28,15 +34,35 @@ function computeAspect() {
 // Resize canvas to match displayed size and devicePixelRatio
 function resizeCanvases() {
     const dpr = window.devicePixelRatio || 1;
-    // Decide CSS size based on container width and aspect ratio
-    const cssW = Math.max(200, Math.min(gameContainer.clientWidth, window.innerWidth));
-    const aspect = computeAspect();
-    const cssH = Math.round(cssW * aspect);
+    
+    // Get container dimensions
+    const containerWidth = gameContainer.clientWidth;
+    const containerHeight = gameContainer.clientHeight;
+    
+    // Calculate aspect ratio based on current grid dimensions
+    const gridAspect = config.lignes / config.colonnes;
+    
+    // Calculate dimensions that fit in the container while maintaining aspect ratio
+    let cssW, cssH;
+    
+    if (containerWidth / containerHeight > gridAspect) {
+        // Container is wider than needed, constrain by height
+        cssH = Math.min(containerHeight, window.innerHeight * 0.8);
+        cssW = cssH / gridAspect;
+    } else {
+        // Container is taller than needed, constrain by width
+        cssW = Math.min(containerWidth, window.innerWidth * 0.8);
+        cssH = cssW * gridAspect;
+    }
+    
+    // Ensure minimum size
+    cssW = Math.max(200, cssW);
+    cssH = Math.max(200, cssH);
 
     // Apply the same CSS size to both canvases so they overlap exactly
     [structureCanvas, jetonsCanvas].forEach((c) => {
-        c.style.width = cssW + 'px';
-        c.style.height = cssH + 'px';
+        c.style.width = Math.round(cssW) + 'px';
+        c.style.height = Math.round(cssH) + 'px';
         // set internal resolution according to DPR
         c.width = Math.round(cssW * dpr);
         c.height = Math.round(cssH * dpr);
@@ -256,8 +282,17 @@ async function initialiserJeu() {
             const data = await response.json();
             // Mettre à jour la grille avec les données du serveur
             grille = data.Cases;
-            // Mettre à jour la config de taille selon la grille côté serveur
-            if (Array.isArray(data.Cases) && data.Cases.length > 0) {
+            // Mettre à jour la config selon la difficulté
+            if (data.Difficulty && config.dimensions[data.Difficulty]) {
+                const dim = config.dimensions[data.Difficulty];
+                config.lignes = dim.lignes;
+                config.colonnes = dim.colonnes;
+                structureCanvas.width = dim.canvasWidth;
+                structureCanvas.height = dim.canvasHeight;
+                jetonsCanvas.width = dim.canvasWidth;
+                jetonsCanvas.height = dim.canvasHeight;
+            } else if (Array.isArray(data.Cases) && data.Cases.length > 0) {
+                // Fallback si la difficulté n'est pas définie
                 config.lignes = data.Cases.length;
                 config.colonnes = data.Cases[0].length;
             }
@@ -316,25 +351,26 @@ function startGame() {
         const formData = new FormData();
         formData.append("player1", player1);
         formData.append("player2", player2);
-        // lire la difficulté choisie
+        // Lire la difficulté choisie
         const difficultyInput = document.querySelector('input[name="difficulty"]:checked');
         const difficulty = difficultyInput ? difficultyInput.value : 'facile';
         formData.append("difficulty", difficulty);
-        
+
         fetch("/", {
             method: "POST",
             body: formData
         }).then(response => {
             if (response.ok) {
-                window.location.href = "power4_jeu";  // Enlève le / au début
+                // Rediriger vers la page de jeu correspondant à la difficulté
+                window.location.href = `/power4_jeu_${difficulty}`;
             } else {
-                alert("Erreur lors de l'envoi des données");
+                alert("Erreur lors de l'envoi des données au serveur.");
             }
         }).catch(error => {
-            console.error("Erreur:", error);
-            alert("Une erreur s'est produite");
+            console.error("Erreur lors de la requête:", error);
+            alert("Une erreur s'est produite lors de la connexion au serveur.");
         });
     } else {
-        alert("Veuillez choisir vos pseudos.");
+        alert("Veuillez entrer des pseudos pour les deux joueurs.");
     }
 }
