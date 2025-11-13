@@ -70,8 +70,9 @@ main {
     padding: 8px;
     border-radius: 6px;
     border: 1px solid #ccc;
-    width: 100%;
-    max-width: 300px;
+    width: 300px;
+    max-width: 100%;
+    display: block;
 }
 
 #difficulty {
@@ -186,12 +187,16 @@ main {
 }
 
 .cellule.joueur1 {
-    background-color: red;
+    background-image: url('images/joueur1.jpg');
+    background-size: cover;
+    background-position: center;
     box-shadow: inset 0 -3px 8px rgba(0, 0, 0, 0.3);
 }
 
 .cellule.joueur2 {
-    background-color: yellow;
+    background-image: url('images/joueur2.jpg');
+    background-size: cover;
+    background-position: center;
     box-shadow: inset 0 -3px 8px rgba(0, 0, 0, 0.3);
 }
 
@@ -234,5 +239,11 @@ footer {
     #grille {
         border-spacing: 5px;
         padding: 10px;
+    }
+
+    /* Adaptation des inputs de pseudo pour petits écrans */
+    #playerChoice input[type="text"] {
+        width: 90%;
+        max-width: 320px;
     }
 }
