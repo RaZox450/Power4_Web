@@ -14,6 +14,8 @@ type Game struct {
 	JoueurActuel int     `json:"JoueurActuel"`
 	Winner       int     `json:"Winner"`
 	Difficulty   string  `json:"Difficulty"`
+	Player1Name  string  `json:"Player1Name"`
+	Player2Name  string  `json:"Player2Name"`
 }
 
 var currentGame *Game
@@ -32,6 +34,8 @@ func newGame(lignes, colonnes int, difficulty string) *Game {
 		JoueurActuel: 1,
 		Winner:       0,
 		Difficulty:   difficulty,
+		Player1Name:  player1Name,
+		Player2Name:  player2Name,
 	}
 }
 
@@ -168,13 +172,44 @@ func checkWin(ligne, colonne int) bool {
 func reinitialiser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	if currentGame != nil {
-		lignes := len(currentGame.Cases)
-		colonnes := len(currentGame.Cases[0])
-		difficulty := currentGame.Difficulty
-		currentGame = newGame(lignes, colonnes, difficulty)
+	// Permettre de réinitialiser avec des paramètres optionnels : ?difficulty=... ou ?lignes=..&colonnes=..
+	q := r.URL.Query()
+	if diff := q.Get("difficulty"); diff != "" {
+		switch diff {
+		case "moyen":
+			currentGame = newGame(6, 9, "moyen")
+		case "difficile":
+			currentGame = newGame(7, 8, "difficile")
+		default:
+			currentGame = newGame(6, 7, "facile")
+		}
+	} else if q.Get("lignes") != "" && q.Get("colonnes") != "" {
+		// supporte reinitialiser?lignes=6&colonnes=9
+		var l, c int
+		_, err1 := fmt.Sscanf(q.Get("lignes"), "%d", &l)
+		_, err2 := fmt.Sscanf(q.Get("colonnes"), "%d", &c)
+		if err1 == nil && err2 == nil && l > 0 && c > 0 {
+			currentGame = newGame(l, c, "custom")
+		} else {
+			// fallback : si params invalides, réinitialiser selon l'état courant
+			if currentGame != nil {
+				lignes := len(currentGame.Cases)
+				colonnes := len(currentGame.Cases[0])
+				difficulty := currentGame.Difficulty
+				currentGame = newGame(lignes, colonnes, difficulty)
+			} else {
+				currentGame = newGame(6, 7, "facile")
+			}
+		}
 	} else {
-		currentGame = newGame(6, 7, "facile")
+		if currentGame != nil {
+			lignes := len(currentGame.Cases)
+			colonnes := len(currentGame.Cases[0])
+			difficulty := currentGame.Difficulty
+			currentGame = newGame(lignes, colonnes, difficulty)
+		} else {
+			currentGame = newGame(6, 7, "facile")
+		}
 	}
 
 	json.NewEncoder(w).Encode(currentGame)

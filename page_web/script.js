@@ -69,8 +69,8 @@ function creerGrille() {
     if (!table) return;
     
     // Récupérer les dimensions depuis les data attributes
-    const lignes = parseInt(table.dataset.lignes) || 6;
-    const colonnes = parseInt(table.dataset.colonnes) || 7;
+    const lignes = parseInt(table.dataset.lignes) || 7;
+    const colonnes = parseInt(table.dataset.colonnes) || 9;
     
     config = { lignes, colonnes };
     table.innerHTML = '';
@@ -109,8 +109,9 @@ async function jouerCoup(colonne) {
 
             if (data.Winner > 0) {
                 const couleur = data.Winner === 1 ? "rouge" : "jaune";
-                document.getElementById("tour").textContent = 
-                    `Le joueur ${data.Winner} a gagné ! (${couleur})`;
+                const nomGagnant = data.Winner === 1 ? data.Player1Name : data.Player2Name;
+                document.getElementById("tour").innerHTML = 
+                    `<span style="font-size: 2.5em; color: #f6d1d8; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">${nomGagnant}</span><br>a gagné ! (${couleur})`;
                 partieTerminee = true;
                 highlightWinner(data.Winner);
             } else {
@@ -217,7 +218,11 @@ document.getElementById("quitter")?.addEventListener("click", () => {
 async function initialiserJeu() {
     const table = document.getElementById('grille');
     if (!table) return; // On est sur la page d'accueil
-    
+    // Lire d'abord les dimensions indiquées par la page (valeurs par défaut)
+    const attrLignes = parseInt(table.dataset.lignes, 10) || config.lignes;
+    const attrColonnes = parseInt(table.dataset.colonnes, 10) || config.colonnes;
+    config = { lignes: attrLignes, colonnes: attrColonnes };
+
     try {
         const response = await fetch("/power4_jeu", {
             method: 'GET',
@@ -226,16 +231,48 @@ async function initialiserJeu() {
                 'Cache-Control': 'no-cache'
             }
         });
-        
+
         if (response.ok) {
             const data = await response.json();
-            
-            // Initialiser la grille vide
-            grille = Array(config.lignes).fill().map(() => Array(config.colonnes).fill(0));
-            
-            // Si le serveur envoie une grille, l'utiliser
-            if (data.Cases && Array.isArray(data.Cases)) {
-                grille = data.Cases;
+
+            // Si le serveur envoie une grille, l'examiner
+            if (data.Cases && Array.isArray(data.Cases) && data.Cases.length > 0) {
+                const serverLignes = data.Cases.length;
+                const serverColonnes = data.Cases[0].length;
+
+                // Si la taille serveur diffère de la taille demandée par la page, demander au serveur de se réinitialiser
+                if (serverLignes !== attrLignes || serverColonnes !== attrColonnes) {
+                    // demander au serveur de créer une grille avec les dimensions désirées
+                    try {
+                        await fetch(`/reinitialiser?lignes=${attrLignes}&colonnes=${attrColonnes}`);
+                        // récupérer la grille mise à jour
+                        const refreshed = await fetch('/power4_jeu', { method: 'GET', headers: { 'Accept': 'application/json' } });
+                        if (refreshed.ok) {
+                            const newData = await refreshed.json();
+                            if (newData.Cases && Array.isArray(newData.Cases) && newData.Cases.length > 0) {
+                                config = { lignes: newData.Cases.length, colonnes: newData.Cases[0].length };
+                                table.dataset.lignes = String(config.lignes);
+                                table.dataset.colonnes = String(config.colonnes);
+                                grille = newData.Cases;
+                            } else {
+                                // fallback
+                                grille = Array(config.lignes).fill().map(() => Array(config.colonnes).fill(0));
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Erreur lors de la synchronisation du serveur :', err);
+                        grille = Array(config.lignes).fill().map(() => Array(config.colonnes).fill(0));
+                    }
+                } else {
+                    // tailles concordantes : utiliser la grille serveur
+                    config = { lignes: serverLignes, colonnes: serverColonnes };
+                    table.dataset.lignes = String(config.lignes);
+                    table.dataset.colonnes = String(config.colonnes);
+                    grille = data.Cases;
+                }
+            } else {
+                // Sinon initialiser une grille vide basée sur les attributs de la page
+                grille = Array(config.lignes).fill().map(() => Array(config.colonnes).fill(0));
             }
         } else {
             grille = Array(config.lignes).fill().map(() => Array(config.colonnes).fill(0));
@@ -244,7 +281,8 @@ async function initialiserJeu() {
         console.error("Erreur d'initialisation:", error);
         grille = Array(config.lignes).fill().map(() => Array(config.colonnes).fill(0));
     }
-    
+
+    // Générer la grille DOM et l'afficher
     creerGrille();
     afficherGrille();
     joueurActuel = 1;
