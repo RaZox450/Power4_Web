@@ -56,8 +56,6 @@ function startGame() {
             console.error("Erreur lors de la requête:", error);
             alert("Une erreur s'est produite lors de la connexion au serveur.");
         });
-    } else {
-        alert("Veuillez entrer des pseudos pour les deux joueurs.");
     }
 }
 
@@ -109,9 +107,10 @@ async function jouerCoup(colonne) {
 
             if (data.Winner > 0) {
                 const couleur = data.Winner === 1 ? "rouge" : "jaune";
-                const nomGagnant = data.Winner === 1 ? data.Player1Name : data.Player2Name;
-                document.getElementById("tour").innerHTML = 
-                    `<span style="font-size: 2.5em; color: #f6d1d8; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">${nomGagnant}</span><br>a gagné ! (${couleur})`;
+                document.getElementById("tour").textContent = 
+                    `Le joueur ${data.Winner} a gagné ! (${couleur})`;
+
+    
                 partieTerminee = true;
                 highlightWinner(data.Winner);
             } else {

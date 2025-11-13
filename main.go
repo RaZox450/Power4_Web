@@ -14,8 +14,6 @@ type Game struct {
 	JoueurActuel int     `json:"JoueurActuel"`
 	Winner       int     `json:"Winner"`
 	Difficulty   string  `json:"Difficulty"`
-	Player1Name  string  `json:"Player1Name"`
-	Player2Name  string  `json:"Player2Name"`
 }
 
 var currentGame *Game
@@ -34,8 +32,6 @@ func newGame(lignes, colonnes int, difficulty string) *Game {
 		JoueurActuel: 1,
 		Winner:       0,
 		Difficulty:   difficulty,
-		Player1Name:  player1Name,
-		Player2Name:  player2Name,
 	}
 }
 
