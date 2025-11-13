@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 // Structure pour la partie
@@ -56,20 +57,20 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.ServeFile(w, r, "./accueil.html")
+	http.ServeFile(w, r, "./page_web/power4_accueil.html")
 }
 
 // Pages de jeu
 func facilePage(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./facile.html")
+	http.ServeFile(w, r, "./page_web/power4_jeu_facile.html")
 }
 
 func moyenPage(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./moyen.html")
+	http.ServeFile(w, r, "./page_web/power4_jeu_moyen.html")
 }
 
 func difficilePage(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./difficile.html")
+	http.ServeFile(w, r, "./page_web/power4_jeu_difficile.html")
 }
 
 // API - Récupérer l'état du jeu
@@ -181,7 +182,9 @@ func reinitialiser(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// Routes HTML
+	// la racine (/) sert la page d'accueil ; garder le chemin explicite pour compatibilité
 	http.HandleFunc("/", homePage)
+	http.HandleFunc("/power4_accueil.html", homePage)
 	http.HandleFunc("/power4_jeu_facile", facilePage)
 	http.HandleFunc("/power4_jeu_moyen", moyenPage)
 	http.HandleFunc("/power4_jeu_difficile", difficilePage)
@@ -191,10 +194,18 @@ func main() {
 	http.HandleFunc("/placer-pion", placerPion)
 	http.HandleFunc("/reinitialiser", reinitialiser)
 
-	// Fichiers statiques
-	http.Handle("/style.css", http.FileServer(http.Dir(".")))
-	http.Handle("/script.js", http.FileServer(http.Dir(".")))
+	// Fichiers statiques (servir depuis le dossier page_web)
+	http.Handle("/style.css", http.FileServer(http.Dir("./page_web")))
+	http.Handle("/script.js", http.FileServer(http.Dir("./page_web")))
+	// Images et autres ressources statiques
+	http.Handle("/images/", http.StripPrefix("/images/", http.FileServer(http.Dir("./page_web/images"))))
 
-	fmt.Println("Serveur démarré sur http://localhost:5500")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	// Permet de remplacer le port via la variable d'environnement PORT (utile pour l'hébergement ou éviter les conflits)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	fmt.Printf("Serveur démarré sur http://localhost:%s\n", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
