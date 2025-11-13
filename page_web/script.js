@@ -14,8 +14,24 @@ let partieTerminee = false;
 
 // Fonction pour démarrer une partie
 function startGame() {
-    const player1 = document.getElementById("player1")?.value;
-    const player2 = document.getElementById("player2")?.value;
+    const player1 = document.getElementById("player1")?.value?.trim() || "";
+    const player2 = document.getElementById("player2")?.value?.trim() || "";
+
+    // Validation des pseudos : non vides, moins de 12 caractères, et différents
+    if (!player1 || !player2) {
+        alert("Veuillez entrer des pseudos pour les deux joueurs.");
+        return;
+    }
+
+    if (player1.length >= 12 || player2.length >= 12) {
+        alert("Chaque pseudo doit contenir moins de 12 caractères.");
+        return;
+    }
+
+    if (player1.toLowerCase() === player2.toLowerCase()) {
+        alert("Les deux pseudos doivent être différents.");
+        return;
+    }
 
     if (player1 && player2) {
         const difficultyInput = document.querySelector('input[name="difficulty"]:checked');

@@ -203,7 +203,7 @@ func main() {
 	// Permet de remplacer le port via la variable d'environnement PORT (utile pour l'hébergement ou éviter les conflits)
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "5500"
 	}
 
 	fmt.Printf("Serveur démarré sur http://localhost:%s\n", port)
