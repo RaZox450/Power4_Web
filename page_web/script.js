@@ -37,6 +37,9 @@ function startGame() {
         const difficultyInput = document.querySelector('input[name="difficulty"]:checked');
         const difficulty = difficultyInput ? difficultyInput.value : 'facile';
         
+        sessionStorage.setItem("player1", player1);
+        sessionStorage.setItem("player2", player2);
+
         const formData = new FormData();
         formData.append("player1", player1);
         formData.append("player2", player2);
@@ -58,6 +61,10 @@ function startGame() {
         });
     }
 }
+
+const pseudoJoueur1 = sessionStorage.getItem("player1") || "Joueur 1";
+const pseudoJoueur2 = sessionStorage.getItem("player2") || "Joueur 2";
+
 
 // ========== PAGE DE JEU ==========
 
@@ -107,16 +114,18 @@ async function jouerCoup(colonne) {
 
             if (data.Winner > 0) {
                 const couleur = data.Winner === 1 ? "rouge" : "jaune";
+                const gagnantPseudo = data.Winner === 1 ? pseudoJoueur1 : pseudoJoueur2;
                 document.getElementById("tour").textContent = 
-                    `Le joueur ${data.Winner} a gagné ! (${couleur})`;
+                    `${gagnantPseudo} a gagné ! (${couleur})`;
 
     
                 partieTerminee = true;
                 highlightWinner(data.Winner);
             } else {
                 const couleur = data.JoueurActuel === 1 ? "rouge" : "jaune";
+                const pseudoActuel = data.JoueurActuel === 1 ? pseudoJoueur1 : pseudoJoueur2;
                 document.getElementById("tour").textContent = 
-                    `Tour du joueur ${data.JoueurActuel} (${couleur})`;
+                    `Tour de ${pseudoActuel} (${couleur})`;
                 joueurActuel = data.JoueurActuel;
             }
         } else {
@@ -201,7 +210,7 @@ document.getElementById("recommencer")?.addEventListener("click", async () => {
             joueurActuel = 1;
             partieTerminee = false;
             afficherGrille();
-            document.getElementById("tour").textContent = "Tour du joueur 1 (rouge)";
+            document.getElementById("tour").textContent = `Tour de ${pseudoJoueur1} (rouge)`;
         }
     } catch (error) {
         console.error("Erreur lors de la réinitialisation:", error);
