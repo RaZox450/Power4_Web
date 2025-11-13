@@ -1,32 +1,33 @@
 <!DOCTYPE html>
 <html lang="fr">
-    <head>
-        <meta charset="UTF-8">
-        <title>Puissance 4 - Facile</title>
-        <link rel="stylesheet" href="/page_web/style.css">
-        <link rel="icon" href="/page_web/images/logo.png">
-    </head>
-    <body>
-        <header>
-            <div id="header">   
-                <h1>Puissance 4 - Mode Facile</h1>
-                <h2>Grille 6x7</h2>
-            </div>
-        </header>
-        <main>
-            <div id="info">
-                <h3 id="tour">Tour du joueur 1</h3>
-                <button id="recommencer">Recommencer</button>
-                <button id="quitter">Quitter</button>
-            </div>
-            <div id="game-container">
-                <canvas id="structure" width="800" height="750"></canvas> 
-                <canvas id="jetons" width="800" height="750"></canvas>
-            </div>
-        </main>
-        <footer>
-            <p>© 2025 Puissance 4 | Tous droits non réservés</p>
-        </footer>
-    </body>
-    <script src="/page_web/script.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puissance 4 - Facile</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div id="header">   
+            <h1>Puissance 4 - Mode Facile</h1>
+            <h2>Grille 6x7</h2>
+        </div>
+    </header>
+    <main>
+        <div id="info">
+            <h3 id="tour">Tour du joueur 1 (rouge)</h3>
+            <button id="recommencer">Recommencer</button>
+            <button id="quitter">Quitter</button>
+        </div>
+        <div id="game-container">
+            <table id="grille" data-lignes="6" data-colonnes="7">
+                <!-- Généré par JavaScript -->
+            </table>
+        </div>
+    </main>
+    <footer>
+        <p>© 2025 Puissance 4 | Tous droits non réservés</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
 </html>

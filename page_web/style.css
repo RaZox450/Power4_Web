@@ -13,7 +13,6 @@ body {
 }
 
 /* Header */
-
 #header {
     background-color: #f6d1d8; 
     color: white;
@@ -34,6 +33,11 @@ header h2 {
     text-shadow: 2px 1px 1px rgba(0, 0, 0, 0.3);
 }
 
+main {
+    min-height: 70vh;
+}
+
+/* Page d'accueil - Rules */
 #rules {
     max-width: 900px;
     margin: 60px auto;
@@ -44,26 +48,49 @@ header h2 {
 }
 
 #rules p {
-    margin-bottom: 3px;
+    margin-bottom: 15px;
     font-family: Arial, Helvetica, sans-serif;
     text-align: justify;
 }
 
 #playerChoice {
     margin-top: 20px;
-    list-style: none;
     display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 15px;  
+    flex-direction: column;
+    gap: 15px;
 }
 
-#playerChoice input {
-    accent-color: #f6d1d8;
-    cursor: pointer;
+#playerChoice p {
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+#playerChoice input[type="text"] {
     padding: 8px;
     border-radius: 6px;
     border: 1px solid #ccc;
+    width: 100%;
+    max-width: 300px;
+}
+
+#difficulty {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#difficulty p {
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+#difficulty label {
+    margin: 0 10px;
+    cursor: pointer;
+}
+
+#difficulty input[type="radio"] {
+    accent-color: #f6d1d8;
+    cursor: pointer;
 }
 
 #gameStart {
@@ -81,52 +108,11 @@ header h2 {
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    display: inline-block;
 }
 
 #gameStart a:hover {
     background-color: #f4a9b7;
-    cursor: pointer;
-}
-
-#game-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 20px auto;
-    position: relative;
-    width: 100%;
-    max-width: 900px;
-    height: auto;
-}
-
-#structure, #jetons {
-    position: absolute;
-    display: block;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    border-radius: 12px;
-    background: transparent;
-    width: 100%;
-    height: 100%;
-}
-
-/* Ensure both canvases (structure + jetons) share the same responsive sizing
-   and are placed inside the game container */
-#game-container {
-    width: 100%;
-    max-width: 1200px; /* sensible max to keep layout neat */
-    margin: 20px auto;
-    position: relative;
-}
-
-#game-container canvas {
-    display: block;
-    width: 100%;   /* CSS width for responsiveness */
-    height: auto;   /* maintain aspect ratio */
-    border-radius: 12px;
-}
-
-main {
-    min-height: 70vh;
 }
 
 /* Info Section */
@@ -164,6 +150,65 @@ main {
     background-color: #f4a9b7;
 }
 
+/* Game Container */
+#game-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+/* Grille de jeu */
+#grille {
+    background-color: #ADD8E6;
+    border-collapse: separate;
+    border-spacing: 10px;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+}
+
+.cellule {
+    width: 80px;
+    height: 80px;
+    background-color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.cellule:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.cellule.joueur1 {
+    background-color: red;
+    box-shadow: inset 0 -3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.cellule.joueur2 {
+    background-color: yellow;
+    box-shadow: inset 0 -3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.cellule.gagnant {
+    animation: pulse 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+    from {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+    to {
+        transform: scale(1.15);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.9);
+    }
+}
+
 /* Footer */
 footer {
     background-color: #f2f2f2;
@@ -172,4 +217,21 @@ footer {
     margin-top: 30px;
     font-size: 0.9em;
     color: #666;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .cellule {
+        width: 50px;
+        height: 50px;
+    }
+
+    header h1 {
+        font-size: 40px;
+    }
+
+    #grille {
+        border-spacing: 5px;
+        padding: 10px;
+    }
 }

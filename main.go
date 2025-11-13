@@ -2,177 +2,107 @@ package main
 
 import (
 	"encoding/json"
-	"html/template"
+	"fmt"
 	"log"
 	"net/http"
 )
 
-// Structure pour la grille de jeu
-type Grille struct {
-	Cases        [][]int
-	JoueurActuel int
-	Pseudo1      string
-	Pseudo2      string
-	Winner       int    // 0 = pas de gagnant, 1 ou 2 pour le gagnant
-	Difficulty   string // "facile", "moyen", "difficile"
+// Structure pour la partie
+type Game struct {
+	Cases        [][]int `json:"Cases"`
+	JoueurActuel int     `json:"JoueurActuel"`
+	Winner       int     `json:"Winner"`
+	Difficulty   string  `json:"Difficulty"`
 }
 
-var grille Grille
+var currentGame *Game
+var player1Name string
+var player2Name string
 
-// Afficher page d'accueil
-func home(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("page_web/power4_accueil.html"))
-	if r.Method != http.MethodPost {
-		tmpl.Execute(w, nil)
-		return
+// Initialiser une nouvelle partie
+func newGame(lignes, colonnes int, difficulty string) *Game {
+	cases := make([][]int, lignes)
+	for i := range cases {
+		cases[i] = make([]int, colonnes)
 	}
 
-	type Joueur struct {
-		Pseudo1 string
-		Pseudo2 string
-	}
-
-	r.ParseForm()
-	difficulty := r.FormValue("difficulty")
-	data := Joueur{
-		Pseudo1: r.FormValue("player1"),
-		Pseudo2: r.FormValue("player2"),
-	}
-
-	// Journaliser les données reçues
-	log.Printf("Données reçues : Pseudo1=%s, Pseudo2=%s, Difficulty=%s", data.Pseudo1, data.Pseudo2, difficulty)
-
-	// Choisir la taille en fonction de la difficulté
-	rows, cols := 6, 7 // par défaut facile
-	switch difficulty {
-	case "facile":
-		rows, cols = 6, 7
-	case "moyen":
-		rows, cols = 6, 9
-	case "difficile":
-		rows, cols = 7, 8
-	}
-
-	// Initialiser la grille vide dynamique
-	cases := make([][]int, rows)
-	for i := 0; i < rows; i++ {
-		cases[i] = make([]int, cols)
-	}
-
-	grille = Grille{
+	return &Game{
 		Cases:        cases,
 		JoueurActuel: 1,
-		Pseudo1:      data.Pseudo1,
-		Pseudo2:      data.Pseudo2,
+		Winner:       0,
 		Difficulty:   difficulty,
 	}
-
-	// Journaliser l'URL de redirection
-	redirectURL := "/power4_jeu_" + difficulty
-	log.Printf("Redirection vers : %s", redirectURL)
-
-	// Rediriger vers la page appropriée selon la difficulté
-	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }
 
-func game(w http.ResponseWriter, r *http.Request) {
-	// Déterminer la difficulté à partir du chemin (ex: /power4_jeu_moyen)
-	path := r.URL.Path
-	difficulty := "facile"
-	switch path {
-	case "/power4_jeu_facile":
-		difficulty = "facile"
-	case "/power4_jeu_moyen":
-		difficulty = "moyen"
-	case "/power4_jeu_difficile":
-		difficulty = "difficile"
-	case "/power4_jeu":
-		// endpoint JSON pour l'initialisation depuis le client
-		// laisser difficulty tel quel (sera géré ci-dessous)
-	default:
-		// si route inconnue, garder la difficulté actuelle ou défaut
-		if grille.Difficulty != "" {
-			difficulty = grille.Difficulty
+// Page d'accueil
+func homePage(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		r.ParseForm()
+		player1Name = r.FormValue("player1")
+		player2Name = r.FormValue("player2")
+		difficulty := r.FormValue("difficulty")
+
+		// Créer une nouvelle partie selon la difficulté
+		switch difficulty {
+		case "moyen":
+			currentGame = newGame(6, 9, difficulty)
+		case "difficile":
+			currentGame = newGame(7, 8, difficulty)
+		default:
+			currentGame = newGame(6, 7, "facile")
 		}
-	}
 
-	// Si la grille n'est pas initialisée ou si la difficulté demandée diffère,
-	// initialiser une nouvelle grille adaptée à la difficulté
-	rows, cols := 6, 7
-	switch difficulty {
-	case "facile":
-		rows, cols = 6, 7
-	case "moyen":
-		rows, cols = 6, 9
-	case "difficile":
-		rows, cols = 7, 8
-	}
-
-	if len(grille.Cases) == 0 || grille.Difficulty != difficulty {
-		cases := make([][]int, rows)
-		for i := 0; i < rows; i++ {
-			cases[i] = make([]int, cols)
-		}
-		grille.Cases = cases
-		grille.JoueurActuel = 1
-		grille.Winner = 0
-		grille.Difficulty = difficulty
-	}
-
-	// Désactiver la mise en cache
-	w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
-	w.Header().Set("Pragma", "no-cache")
-	w.Header().Set("Expires", "0")
-
-	// Si la requête demande du JSON, on renvoie la grille en JSON
-	if r.Header.Get("Accept") == "application/json" {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(grille)
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 
-	// Si on veut la page HTML, servir le fichier statique correspondant à la difficulté
-	file := "page_web/power4_jeu_facile.html"
-	switch grille.Difficulty {
-	case "moyen":
-		file = "page_web/power4_jeu_moyen.html"
-	case "difficile":
-		file = "page_web/power4_jeu_difficile.html"
-	}
-
-	http.ServeFile(w, r, file)
+	http.ServeFile(w, r, "./accueil.html")
 }
 
-// Fonction pour placer un pion
+// Pages de jeu
+func facilePage(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./facile.html")
+}
+
+func moyenPage(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./moyen.html")
+}
+
+func difficilePage(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./difficile.html")
+}
+
+// API - Récupérer l'état du jeu
+func getGame(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	if currentGame == nil {
+		currentGame = newGame(6, 7, "facile")
+	}
+
+	json.NewEncoder(w).Encode(currentGame)
+}
+
+// API - Placer un pion
 func placerPion(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
-		return
-	}
+	w.Header().Set("Content-Type", "application/json")
 
 	var colonne int
 	err := json.NewDecoder(r.Body).Decode(&colonne)
 	if err != nil {
-		http.Error(w, "Erreur de décodage JSON", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Vérifier si la colonne est valide en fonction de la grille actuelle
-	rows := len(grille.Cases)
-	if rows == 0 {
-		http.Error(w, "Grille non initialisée", http.StatusInternalServerError)
-		return
-	}
-	cols := len(grille.Cases[0])
-	if colonne < 0 || colonne >= cols {
-		http.Error(w, "Colonne invalide", http.StatusBadRequest)
+	if currentGame == nil {
+		http.Error(w, "Aucune partie en cours", http.StatusBadRequest)
 		return
 	}
 
-	// Trouver la première case vide dans la colonne (depuis le bas)
+	// Trouver la ligne disponible
 	ligne := -1
-	for i := rows - 1; i >= 0; i-- {
-		if grille.Cases[i][colonne] == 0 {
+	for i := len(currentGame.Cases) - 1; i >= 0; i-- {
+		if currentGame.Cases[i][colonne] == 0 {
 			ligne = i
 			break
 		}
@@ -184,101 +114,87 @@ func placerPion(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Placer le pion
-	currentPlayer := grille.JoueurActuel
-	grille.Cases[ligne][colonne] = currentPlayer
+	currentGame.Cases[ligne][colonne] = currentGame.JoueurActuel
 
-	// Vérifier si le joueur courant a gagné
-	if checkVictory(currentPlayer) {
-		grille.Winner = currentPlayer
-		// Ne pas changer de joueur si la partie est terminée
+	// Vérifier la victoire
+	if checkWin(ligne, colonne) {
+		currentGame.Winner = currentGame.JoueurActuel
 	} else {
-		// Changer de joueur seulement si personne n'a gagné
-		if grille.JoueurActuel == 1 {
-			grille.JoueurActuel = 2
+		// Changer de joueur
+		if currentGame.JoueurActuel == 1 {
+			currentGame.JoueurActuel = 2
 		} else {
-			grille.JoueurActuel = 1
+			currentGame.JoueurActuel = 1
 		}
 	}
 
-	// Renvoyer la grille mise à jour
-	json.NewEncoder(w).Encode(grille)
+	json.NewEncoder(w).Encode(currentGame)
 }
 
-// Vérifie si le joueur 'player' a 4 jetons alignés
-func checkVictory(player int) bool {
-	if player == 0 {
-		return false
+// Vérifier la victoire
+func checkWin(ligne, colonne int) bool {
+	joueur := currentGame.Cases[ligne][colonne]
+	directions := [][2][2]int{
+		{{0, 1}, {0, -1}},  // Horizontal
+		{{1, 0}, {-1, 0}},  // Vertical
+		{{1, 1}, {-1, -1}}, // Diagonale \
+		{{1, -1}, {-1, 1}}, // Diagonale /
 	}
-	directions := [][2]int{{0, 1}, {1, 0}, {1, 1}, {1, -1}} // droite, bas, diag bas-droite, diag bas-gauche
-	rows := len(grille.Cases)
-	if rows == 0 {
-		return false
-	}
-	cols := len(grille.Cases[0])
 
-	for i := 0; i < rows; i++ {
-		for j := 0; j < cols; j++ {
-			if grille.Cases[i][j] != player {
-				continue
-			}
-			// tester chaque direction
-			for _, d := range directions {
-				count := 1
-				x := i + d[0]
-				y := j + d[1]
-				for count < 4 && x >= 0 && x < rows && y >= 0 && y < cols && grille.Cases[x][y] == player {
-					count++
-					x += d[0]
-					y += d[1]
-				}
-				if count >= 4 {
-					return true
-				}
+	for _, direction := range directions {
+		count := 1
+
+		for _, d := range direction {
+			l, c := ligne+d[0], colonne+d[1]
+			for l >= 0 && l < len(currentGame.Cases) &&
+				c >= 0 && c < len(currentGame.Cases[0]) &&
+				currentGame.Cases[l][c] == joueur {
+				count++
+				l += d[0]
+				c += d[1]
 			}
 		}
+
+		if count >= 4 {
+			return true
+		}
 	}
+
 	return false
 }
 
-// création du serveur
-// Réinitialise complètement la partie
+// API - Réinitialiser la partie
 func reinitialiser(w http.ResponseWriter, r *http.Request) {
-	// Créer une nouvelle grille vide
-	// garder dimensions actuelles
-	rows := 6
-	cols := 7
-	if len(grille.Cases) > 0 {
-		rows = len(grille.Cases)
-		cols = len(grille.Cases[0])
-	}
-	cases := make([][]int, rows)
-	for i := 0; i < rows; i++ {
-		cases[i] = make([]int, cols)
-	}
-	grille = Grille{
-		Cases:        cases,
-		JoueurActuel: 1,
-		Winner:       0,
-		Pseudo1:      grille.Pseudo1,
-		Pseudo2:      grille.Pseudo2,
-		Difficulty:   grille.Difficulty,
+	w.Header().Set("Content-Type", "application/json")
+
+	if currentGame != nil {
+		lignes := len(currentGame.Cases)
+		colonnes := len(currentGame.Cases[0])
+		difficulty := currentGame.Difficulty
+		currentGame = newGame(lignes, colonnes, difficulty)
+	} else {
+		currentGame = newGame(6, 7, "facile")
 	}
 
-	// Renvoyer la nouvelle grille en JSON
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(grille)
+	json.NewEncoder(w).Encode(currentGame)
 }
 
 func main() {
-	fs := http.FileServer(http.Dir("page_web/"))
-	http.Handle("/page_web/", http.StripPrefix("/page_web/", fs))
-	http.HandleFunc("/", home)
-	// Routes pour chaque difficulté
-	http.HandleFunc("/power4_jeu_facile", game)
-	http.HandleFunc("/power4_jeu_moyen", game)
-	http.HandleFunc("/power4_jeu_difficile", game)
-	http.HandleFunc("/power4_jeu", game) // endpoint JSON pour initialisation client
+	// Routes HTML
+	http.HandleFunc("/", homePage)
+	http.HandleFunc("/power4_jeu_facile", facilePage)
+	http.HandleFunc("/power4_jeu_moyen", moyenPage)
+	http.HandleFunc("/power4_jeu_difficile", difficilePage)
+
+	// Routes API
+	http.HandleFunc("/power4_jeu", getGame)
 	http.HandleFunc("/placer-pion", placerPion)
 	http.HandleFunc("/reinitialiser", reinitialiser)
-	http.ListenAndServe(":5500", nil)
+
+	// Fichiers statiques
+	http.Handle("/style.css", http.FileServer(http.Dir(".")))
+	http.Handle("/script.js", http.FileServer(http.Dir(".")))
+
+	fmt.Println("Serveur démarré sur http://localhost:5500")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

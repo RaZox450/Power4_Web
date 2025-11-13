@@ -1,44 +1,47 @@
 <!DOCTYPE html>
 <html lang="fr">
-    <head>
-        <meta charset="UTF-8">
-        <title>Puissance 4 - Jeu</title>
-        <link rel="stylesheet" href="/page_web/style.css">
-        <link rel="icon" href="/page_web/images/logo.png">
-        <style type="text/css" id="operaUserStyle"></style>
-    </head>
-    <body>
-        <header>
-            <div id="header">   
-                <h1>Puissance 4</h1>
-                <h2>Le jeu est disponible pour 2 joueurs !</h2>
-            </div>
-        </header>
-        <main>
-            <div id ="rules">
-                <p>Le joueur 1 est représenté par des pions rouges et le joueur 2 par des pions jaunes.</p>
-                <p>Le but du jeu est d'aligner 4 pions de sa couleur horizontalement, verticalement ou en diagonale.</p>
-                <p>Le joueur 1 commence toujours la partie.</p>
-                <div id="playerChoice">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puissance 4 - Jeu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div id="header">   
+            <h1>Puissance 4</h1>
+            <h2>Le jeu est disponible pour 2 joueurs !</h2>
+        </div>
+    </header>
+    <main>
+        <div id="rules">
+            <p>Le joueur 1 est représenté par des pions rouges et le joueur 2 par des pions jaunes.</p>
+            <p>Le but du jeu est d'aligner 4 pions de sa couleur horizontalement, verticalement ou en diagonale.</p>
+            <p>Le joueur 1 commence toujours la partie.</p>
+            <div id="playerChoice">
+                <div>
                     <p>Choix du pseudo du joueur 1 : </p>
                     <input type="text" id="player1" name="player1" placeholder="Joueur 1">
+                </div>
+                <div>
                     <p>Choix du pseudo du joueur 2 : </p>
                     <input type="text" id="player2" name="player2" placeholder="Joueur 2">
                 </div>
-                <div id="difficulty" style="text-align:center; margin-top:20px;">
-                    <p>Choix de la difficulté :</p>
-                    <label><input type="radio" name="difficulty" value="facile" checked> Facile (6x7)</label>
-                    <label style="margin-left:10px;"><input type="radio" name="difficulty" value="moyen"> Moyen (6x9)</label>
-                    <label style="margin-left:10px;"><input type="radio" name="difficulty" value="difficile"> Difficile (7x8)</label>
-                </div>
             </div>
-            <div id="gameStart">
-                <a onclick="startGame()">Commencer une partie</a>
+            <div id="difficulty">
+                <p>Choix de la difficulté :</p>
+                <label><input type="radio" name="difficulty" value="facile" checked> Facile (6x7)</label>
+                <label><input type="radio" name="difficulty" value="moyen"> Moyen (6x9)</label>
+                <label><input type="radio" name="difficulty" value="difficile"> Difficile (7x8)</label>
             </div>
-        </main>
-        <footer>
-            <p>© 2025 Puissance 4 | Tous droits non réservés</p>
-        </footer>
-    </body>
-    <script src="/page_web/script.js"></script>
+        </div>
+        <div id="gameStart">
+            <a onclick="startGame()">Commencer une partie</a>
+        </div>
+    </main>
+    <footer>
+        <p>© 2025 Puissance 4 | Tous droits non réservés</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
 </html>
