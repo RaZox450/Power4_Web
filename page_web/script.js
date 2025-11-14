@@ -10,6 +10,10 @@ let grille = [];
 let joueurActuel = 1;
 let partieTerminee = false;
 
+// Récupérer les pseudos dès le début
+const pseudoJoueur1 = sessionStorage.getItem("player1") || "Joueur 1";
+const pseudoJoueur2 = sessionStorage.getItem("player2") || "Joueur 2";
+
 // ========== PAGE D'ACCUEIL ==========
 
 // Fonction pour démarrer une partie
@@ -61,10 +65,6 @@ function startGame() {
         });
     }
 }
-
-const pseudoJoueur1 = sessionStorage.getItem("player1") || "Joueur 1";
-const pseudoJoueur2 = sessionStorage.getItem("player2") || "Joueur 2";
-
 
 // ========== PAGE DE JEU ==========
 
@@ -295,9 +295,15 @@ async function initialiserJeu() {
     afficherGrille();
     joueurActuel = 1;
     partieTerminee = false;
+    document.getElementById("tour").textContent = `Tour de ${pseudoJoueur1} (rouge)`;
 }
 
 // Démarrer le jeu au chargement de la page
 window.addEventListener('DOMContentLoaded', () => {
+    // Afficher immédiatement le pseudo si on est sur une page de jeu
+    const tourElement = document.getElementById("tour");
+    if (tourElement) {
+        tourElement.textContent = `Tour de ${pseudoJoueur1} (rouge)`;
+    }
     initialiserJeu();
 });
