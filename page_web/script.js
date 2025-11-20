@@ -1,4 +1,4 @@
-// Configuration du jeu selon la difficulté.
+// Game setup depending of the difficulties.
 const configurations = {
     'facile': { lignes: 6, colonnes: 7 },
     'moyen': { lignes: 6, colonnes: 9 },
@@ -10,7 +10,7 @@ let grille = [];
 let joueurActuel = 1;
 let partieTerminee = false;
 
-// Récupérer les pseudos dès le début.
+// To collect the pseudos early on.
 const pseudoJoueur1 = sessionStorage.getItem("player1") || "Joueur 1";
 const pseudoJoueur2 = sessionStorage.getItem("player2") || "Joueur 2";
 
@@ -66,9 +66,9 @@ function startGame() {
     }
 }
 
-// PAGE DE JEU.
+// GAME PAGE.
 
-// Créer la grille HTML.
+// HTML gride's creation.
 function creerGrille() {
     const table = document.getElementById('grille');
     if (!table) return;
@@ -94,7 +94,7 @@ function creerGrille() {
     }
 }
 
-// Jouer un coup
+// To play a token.
 async function jouerCoup(colonne) {
     if (partieTerminee) return;
 
@@ -136,7 +136,7 @@ async function jouerCoup(colonne) {
     }
 }
 
-// Afficher la grille
+// To show the gride.
 function afficherGrille() {
     for (let i = 0; i < config.lignes; i++) {
         for (let j = 0; j < config.colonnes; j++) {
@@ -154,7 +154,7 @@ function afficherGrille() {
     }
 }
 
-// Mettre en évidence les jetons gagnants
+// Flash the winning tokens.
 function highlightWinner(joueur) {
     for (let i = 0; i < config.lignes; i++) {
         for (let j = 0; j < config.colonnes; j++) {
@@ -194,7 +194,7 @@ function highlightWinner(joueur) {
     }
 }
 
-// Recommencer la partie
+// To restart the game.
 document.getElementById("recommencer")?.addEventListener("click", async () => {
     try {
         const response = await fetch("/reinitialiser", {
@@ -217,16 +217,16 @@ document.getElementById("recommencer")?.addEventListener("click", async () => {
     }
 });
 
-// Quitter et retourner à l'accueil
+// To leave and to return home page.
 document.getElementById("quitter")?.addEventListener("click", () => {
     window.location.href = "/";
 });
 
-// Initialiser le jeu
+// Initialize the game.
 async function initialiserJeu() {
     const table = document.getElementById('grille');
     if (!table) return; // On est sur la page d'accueil
-    // Lire d'abord les dimensions indiquées par la page (valeurs par défaut)
+    // Read the dimensions indicated by the page first (default values).
     const attrLignes = parseInt(table.dataset.lignes, 10) || config.lignes;
     const attrColonnes = parseInt(table.dataset.colonnes, 10) || config.colonnes;
     config = { lignes: attrLignes, colonnes: attrColonnes };
@@ -243,17 +243,17 @@ async function initialiserJeu() {
         if (response.ok) {
             const data = await response.json();
 
-            // Si le serveur envoie une grille, l'examiner
+            // If the servor send a grid, examine it.
             if (data.Cases && Array.isArray(data.Cases) && data.Cases.length > 0) {
                 const serverLignes = data.Cases.length;
                 const serverColonnes = data.Cases[0].length;
 
-                // Si la taille serveur diffère de la taille demandée par la page, demander au serveur de se réinitialiser
+                // If the server size differs from the size requested by the page, ask the server to reset.
                 if (serverLignes !== attrLignes || serverColonnes !== attrColonnes) {
-                    // demander au serveur de créer une grille avec les dimensions désirées
+                    // Ask to the servor to create a grid with the wanting dimensions.
                     try {
                         await fetch(`/reinitialiser?lignes=${attrLignes}&colonnes=${attrColonnes}`);
-                        // récupérer la grille mise à jour
+                        // To collect the update grid.
                         const refreshed = await fetch('/power4_jeu', { method: 'GET', headers: { 'Accept': 'application/json' } });
                         if (refreshed.ok) {
                             const newData = await refreshed.json();
@@ -263,7 +263,6 @@ async function initialiserJeu() {
                                 table.dataset.colonnes = String(config.colonnes);
                                 grille = newData.Cases;
                             } else {
-                                // fallback
                                 grille = Array(config.lignes).fill().map(() => Array(config.colonnes).fill(0));
                             }
                         }
@@ -272,14 +271,14 @@ async function initialiserJeu() {
                         grille = Array(config.lignes).fill().map(() => Array(config.colonnes).fill(0));
                     }
                 } else {
-                    // tailles concordantes : utiliser la grille serveur
+                    // matching sizes: use the server grid.
                     config = { lignes: serverLignes, colonnes: serverColonnes };
                     table.dataset.lignes = String(config.lignes);
                     table.dataset.colonnes = String(config.colonnes);
                     grille = data.Cases;
                 }
             } else {
-                // Sinon initialiser une grille vide basée sur les attributs de la page
+                // Otherwise initialize a blank grid based on the page attributes.
                 grille = Array(config.lignes).fill().map(() => Array(config.colonnes).fill(0));
             }
         } else {
@@ -290,7 +289,7 @@ async function initialiserJeu() {
         grille = Array(config.lignes).fill().map(() => Array(config.colonnes).fill(0));
     }
 
-    // Générer la grille DOM et l'afficher
+    // Generate the DOM grid and display it.
     creerGrille();
     afficherGrille();
     joueurActuel = 1;
@@ -298,9 +297,9 @@ async function initialiserJeu() {
     document.getElementById("tour").textContent = `Tour de ${pseudoJoueur1} (rouge)`;
 }
 
-// Démarrer le jeu au chargement de la page
+// Start the game when the page loads.
 window.addEventListener('DOMContentLoaded', () => {
-    // Afficher immédiatement le pseudo si on est sur une page de jeu
+    // Immediately display the nickname if you are on a game page.
     const tourElement = document.getElementById("tour");
     if (tourElement) {
         tourElement.textContent = `Tour de ${pseudoJoueur1} (rouge)`;
