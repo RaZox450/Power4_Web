@@ -69,7 +69,7 @@ function startGame() {
 // GAME PAGE.
 
 // HTML gride's creation.
-function creerGrille() {
+function GridCreation() {
     const table = document.getElementById('grille');
     if (!table) return;
     
@@ -87,7 +87,7 @@ function creerGrille() {
             td.className = 'cellule';
             td.dataset.ligne = ligne;
             td.dataset.colonne = colonne;
-            td.addEventListener('click', () => jouerCoup(colonne));
+            td.addEventListener('click', () => PlayToken(colonne));
             tr.appendChild(td);
         }
         table.appendChild(tr);
@@ -95,7 +95,7 @@ function creerGrille() {
 }
 
 // To play a token.
-async function jouerCoup(colonne) {
+async function PlayToken(colonne) {
     if (partieTerminee) return;
 
     try {
@@ -110,7 +110,7 @@ async function jouerCoup(colonne) {
         if (response.ok) {
             const data = await response.json();
             grille = data.Cases;
-            afficherGrille();
+            ShowGrille();
 
             if (data.Winner > 0) {
                 const couleur = data.Winner === 1 ? "rouge" : "jaune";
@@ -137,7 +137,7 @@ async function jouerCoup(colonne) {
 }
 
 // To show the gride.
-function afficherGrille() {
+function ShowGrille() {
     for (let i = 0; i < config.lignes; i++) {
         for (let j = 0; j < config.colonnes; j++) {
             const cellule = document.querySelector(`[data-ligne="${i}"][data-colonne="${j}"]`);
@@ -209,7 +209,7 @@ document.getElementById("recommencer")?.addEventListener("click", async () => {
             grille = data.Cases;
             joueurActuel = 1;
             partieTerminee = false;
-            afficherGrille();
+            ShowGrille();
             document.getElementById("tour").textContent = `Tour de ${pseudoJoueur1} (rouge)`;
         }
     } catch (error) {
@@ -223,7 +223,7 @@ document.getElementById("quitter")?.addEventListener("click", () => {
 });
 
 // Initialize the game.
-async function initialiserJeu() {
+async function GameInitialization() {
     const table = document.getElementById('grille');
     if (!table) return; // On est sur la page d'accueil
     // Read the dimensions indicated by the page first (default values).
@@ -290,8 +290,8 @@ async function initialiserJeu() {
     }
 
     // Generate the DOM grid and display it.
-    creerGrille();
-    afficherGrille();
+    GridCreation();
+    ShowGrille();
     joueurActuel = 1;
     partieTerminee = false;
     document.getElementById("tour").textContent = `Tour de ${pseudoJoueur1} (rouge)`;
@@ -304,5 +304,5 @@ window.addEventListener('DOMContentLoaded', () => {
     if (tourElement) {
         tourElement.textContent = `Tour de ${pseudoJoueur1} (rouge)`;
     }
-    initialiserJeu();
+    GameInitialization();
 });

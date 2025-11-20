@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-// Structure pour la partie
+// Structure for the part.
 type Game struct {
 	Cases        [][]int `json:"Cases"`
 	JoueurActuel int     `json:"JoueurActuel"`
@@ -20,7 +20,7 @@ var currentGame *Game
 var player1Name string
 var player2Name string
 
-// Initialiser une nouvelle partie
+// Initialize a new game.
 func newGame(lignes, colonnes int, difficulty string) *Game {
 	cases := make([][]int, lignes)
 	for i := range cases {
@@ -35,7 +35,7 @@ func newGame(lignes, colonnes int, difficulty string) *Game {
 	}
 }
 
-// Page d'accueil
+// Homepage.
 func homePage(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		r.ParseForm()
@@ -60,20 +60,20 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./page_web/power4_accueil.html")
 }
 
-// Pages de jeu
-func facilePage(w http.ResponseWriter, r *http.Request) {
+// Game pages.
+func EasyPage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./page_web/power4_jeu_facile.html")
 }
 
-func moyenPage(w http.ResponseWriter, r *http.Request) {
+func MediumPage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./page_web/power4_jeu_moyen.html")
 }
 
-func difficilePage(w http.ResponseWriter, r *http.Request) {
+func HardPage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./page_web/power4_jeu_difficile.html")
 }
 
-// API - Récupérer l'état du jeu
+// API - Retrieve the game state.
 func getGame(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -84,8 +84,8 @@ func getGame(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(currentGame)
 }
 
-// API - Placer un pion
-func placerPion(w http.ResponseWriter, r *http.Request) {
+// API - Place a pawn.
+func PlacePawn(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var colonne int
@@ -100,7 +100,7 @@ func placerPion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Trouver la ligne disponible
+	// Find the available line.
 	ligne := -1
 	for i := len(currentGame.Cases) - 1; i >= 0; i-- {
 		if currentGame.Cases[i][colonne] == 0 {
@@ -114,14 +114,14 @@ func placerPion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Placer le pion
+	// Place the token.
 	currentGame.Cases[ligne][colonne] = currentGame.JoueurActuel
 
-	// Vérifier la victoire
+	// Verify the victory.
 	if checkWin(ligne, colonne) {
 		currentGame.Winner = currentGame.JoueurActuel
 	} else {
-		// Changer de joueur
+		// Change player.
 		if currentGame.JoueurActuel == 1 {
 			currentGame.JoueurActuel = 2
 		} else {
@@ -132,7 +132,7 @@ func placerPion(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(currentGame)
 }
 
-// Vérifier la victoire
+// Verify the victory.
 func checkWin(ligne, colonne int) bool {
 	joueur := currentGame.Cases[ligne][colonne]
 	directions := [][2][2]int{
@@ -164,11 +164,10 @@ func checkWin(ligne, colonne int) bool {
 	return false
 }
 
-// API - Réinitialiser la partie
-func reinitialiser(w http.ResponseWriter, r *http.Request) {
+// API - Reset part.
+func reset(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// Permettre de réinitialiser avec des paramètres optionnels : ?difficulty=... ou ?lignes=..&colonnes=..
 	q := r.URL.Query()
 	if diff := q.Get("difficulty"); diff != "" {
 		switch diff {
@@ -180,14 +179,12 @@ func reinitialiser(w http.ResponseWriter, r *http.Request) {
 			currentGame = newGame(6, 7, "facile")
 		}
 	} else if q.Get("lignes") != "" && q.Get("colonnes") != "" {
-		// supporte reinitialiser?lignes=6&colonnes=9
 		var l, c int
 		_, err1 := fmt.Sscanf(q.Get("lignes"), "%d", &l)
 		_, err2 := fmt.Sscanf(q.Get("colonnes"), "%d", &c)
 		if err1 == nil && err2 == nil && l > 0 && c > 0 {
 			currentGame = newGame(l, c, "custom")
 		} else {
-			// fallback : si params invalides, réinitialiser selon l'état courant
 			if currentGame != nil {
 				lignes := len(currentGame.Cases)
 				colonnes := len(currentGame.Cases[0])
@@ -212,26 +209,26 @@ func reinitialiser(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// Routes HTML
-	// la racine (/) sert la page d'accueil ; garder le chemin explicite pour compatibilité
+	// HTML Routes
+	// the root (/) serves as the homepage; keep the path explicit for compatibility
 	http.HandleFunc("/", homePage)
 	http.HandleFunc("/power4_accueil.html", homePage)
-	http.HandleFunc("/power4_jeu_facile", facilePage)
-	http.HandleFunc("/power4_jeu_moyen", moyenPage)
-	http.HandleFunc("/power4_jeu_difficile", difficilePage)
+	http.HandleFunc("/power4_jeu_facile", EasyPage)
+	http.HandleFunc("/power4_jeu_moyen", MediumPage)
+	http.HandleFunc("/power4_jeu_difficile", HardPage)
 
-	// Routes API
+	// API roads
 	http.HandleFunc("/power4_jeu", getGame)
-	http.HandleFunc("/placer-pion", placerPion)
-	http.HandleFunc("/reinitialiser", reinitialiser)
+	http.HandleFunc("/placer-pion", PlacePawn)
+	http.HandleFunc("/reset", reset)
 
-	// Fichiers statiques (servir depuis le dossier page_web)
+	// Static files (serve from the page_web folder).
 	http.Handle("/style.css", http.FileServer(http.Dir("./page_web")))
 	http.Handle("/script.js", http.FileServer(http.Dir("./page_web")))
-	// Images et autres ressources statiques
+	// Images and other static resources.
 	http.Handle("/images/", http.StripPrefix("/images/", http.FileServer(http.Dir("./page_web/images"))))
 
-	// Permet de remplacer le port via la variable d'environnement PORT (utile pour l'hébergement ou éviter les conflits)
+	// Allows to replace the port via the environment variable PORT (useful for hosting or avoiding conflicts).
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "5500"
