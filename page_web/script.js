@@ -197,7 +197,7 @@ function highlightWinner(joueur) {
 // To restart the game.
 document.getElementById("recommencer")?.addEventListener("click", async () => {
     try {
-        const response = await fetch("/reinitialiser", {
+        const response = await fetch("/reset", {
             method: "GET",
             headers: {
                 "Accept": "application/json"
@@ -252,7 +252,7 @@ async function GameInitialization() {
                 if (serverLignes !== attrLignes || serverColonnes !== attrColonnes) {
                     // Ask to the servor to create a grid with the wanting dimensions.
                     try {
-                        await fetch(`/reinitialiser?lignes=${attrLignes}&colonnes=${attrColonnes}`);
+                        await fetch(`/reset?lignes=${attrLignes}&colonnes=${attrColonnes}`);
                         // To collect the update grid.
                         const refreshed = await fetch('/power4_jeu', { method: 'GET', headers: { 'Accept': 'application/json' } });
                         if (refreshed.ok) {
