@@ -1,4 +1,4 @@
-// Configuration du jeu selon la difficulté
+// Configuration du jeu selon la difficulté.
 const configurations = {
     'facile': { lignes: 6, colonnes: 7 },
     'moyen': { lignes: 6, colonnes: 9 },
@@ -10,18 +10,18 @@ let grille = [];
 let joueurActuel = 1;
 let partieTerminee = false;
 
-// Récupérer les pseudos dès le début
+// Récupérer les pseudos dès le début.
 const pseudoJoueur1 = sessionStorage.getItem("player1") || "Joueur 1";
 const pseudoJoueur2 = sessionStorage.getItem("player2") || "Joueur 2";
 
-// ========== PAGE D'ACCUEIL ==========
+// PAGE D'ACCUEIL.
 
-// Fonction pour démarrer une partie
+// Function to start the game.
 function startGame() {
     const player1 = document.getElementById("player1")?.value?.trim() || "";
     const player2 = document.getElementById("player2")?.value?.trim() || "";
 
-    // Validation des pseudos : non vides, moins de 12 caractères, et différents
+    // Pseudo validations : no empty, less of twelve characters and differents.
     if (!player1 || !player2) {
         alert("Veuillez entrer des pseudos pour les deux joueurs.");
         return;
@@ -66,14 +66,14 @@ function startGame() {
     }
 }
 
-// ========== PAGE DE JEU ==========
+// PAGE DE JEU.
 
-// Créer la grille HTML
+// Créer la grille HTML.
 function creerGrille() {
     const table = document.getElementById('grille');
     if (!table) return;
     
-    // Récupérer les dimensions depuis les data attributes
+    // Récupérer les dimensions depuis les data attributes.
     const lignes = parseInt(table.dataset.lignes) || 7;
     const colonnes = parseInt(table.dataset.colonnes) || 9;
     
