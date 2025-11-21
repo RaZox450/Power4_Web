@@ -54,7 +54,7 @@ function startGame() {
             body: formData
         }).then(response => {
             if (response.ok) {
-                // Rediriger vers la page de jeu correspondante
+                // Redirect to the corresponding game page.
                 window.location.href = `/power4_jeu_${difficulty}`;
             } else {
                 alert("Erreur lors de l'envoi des données au serveur.");
@@ -73,7 +73,7 @@ function GridCreation() {
     const table = document.getElementById('grille');
     if (!table) return;
     
-    // Récupérer les dimensions depuis les data attributes.
+    // Retrieve the dimensions from the data attributes.
     const lignes = parseInt(table.dataset.lignes) || 7;
     const colonnes = parseInt(table.dataset.colonnes) || 9;
     
@@ -160,10 +160,10 @@ function highlightWinner(joueur) {
         for (let j = 0; j < config.colonnes; j++) {
             if (grille[i] && grille[i][j] === joueur) {
                 const directions = [
-                    [[0, 1], [0, -1]],   // Horizontal
-                    [[1, 0], [-1, 0]],   // Vertical
-                    [[1, 1], [-1, -1]],  // Diagonale \
-                    [[1, -1], [-1, 1]]   // Diagonale /
+                    [[0, 1], [0, -1]],
+                    [[1, 0], [-1, 0]],
+                    [[1, 1], [-1, -1]],
+                    [[1, -1], [-1, 1]]
                 ];
 
                 for (const direction of directions) {
@@ -225,6 +225,7 @@ document.getElementById("quitter")?.addEventListener("click", () => {
 // Initialize the game.
 async function GameInitialization() {
     const table = document.getElementById('grille');
+    if (!table) return; 
     // Read the dimensions indicated by the page first (default values).
     const attrLignes = parseInt(table.dataset.lignes, 10) || config.lignes;
     const attrColonnes = parseInt(table.dataset.colonnes, 10) || config.colonnes;

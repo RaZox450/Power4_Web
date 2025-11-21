@@ -1,4 +1,4 @@
-/* Base du site */
+/* Site base */
 * {
     margin: 0;
     padding: 0;
@@ -37,7 +37,7 @@ main {
     min-height: 70vh;
 }
 
-/* Page d'accueil - Rules */
+/* Homepage - Rules */
 #rules {
     max-width: 900px;
     margin: 60px auto;
@@ -161,7 +161,7 @@ main {
     padding: 20px;
 }
 
-/* Grille de jeu */
+/* Game grid*/
 #grille {
     background-color: #ADD8E6;
     border-collapse: separate;
@@ -241,7 +241,7 @@ footer {
         padding: 10px;
     }
 
-    /* Adaptation des inputs de pseudo pour petits écrans */
+    /* Adaptation of pseudo inputs for small screens */
     #playerChoice input[type="text"] {
         width: 90%;
         max-width: 320px;

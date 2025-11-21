@@ -43,7 +43,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 		player2Name = r.FormValue("player2")
 		difficulty := r.FormValue("difficulty")
 
-		// Créer une nouvelle partie selon la difficulté
+		// Create a new game according to his difficulty.
 		switch difficulty {
 		case "moyen":
 			currentGame = newGame(6, 9, difficulty)
@@ -136,10 +136,10 @@ func PlacePawn(w http.ResponseWriter, r *http.Request) {
 func checkWin(ligne, colonne int) bool {
 	joueur := currentGame.Cases[ligne][colonne]
 	directions := [][2][2]int{
-		{{0, 1}, {0, -1}},  // Horizontal
-		{{1, 0}, {-1, 0}},  // Vertical
-		{{1, 1}, {-1, -1}}, // Diagonale \
-		{{1, -1}, {-1, 1}}, // Diagonale /
+		{{0, 1}, {0, -1}},
+		{{1, 0}, {-1, 0}},
+		{{1, 1}, {-1, -1}},
+		{{1, -1}, {-1, 1}},
 	}
 
 	for _, direction := range directions {
