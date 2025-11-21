@@ -225,7 +225,6 @@ document.getElementById("quitter")?.addEventListener("click", () => {
 // Initialize the game.
 async function GameInitialization() {
     const table = document.getElementById('grille');
-    if (!table) return; // On est sur la page d'accueil
     // Read the dimensions indicated by the page first (default values).
     const attrLignes = parseInt(table.dataset.lignes, 10) || config.lignes;
     const attrColonnes = parseInt(table.dataset.colonnes, 10) || config.colonnes;
